@@ -1,0 +1,3 @@
+/home/logan/CLionProjects/C-GUI Test/cmake-build-debug/CMakeFiles/C_GUI_Test.dir
+/home/logan/CLionProjects/C-GUI Test/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/logan/CLionProjects/C-GUI Test/cmake-build-debug/CMakeFiles/rebuild_cache.dir

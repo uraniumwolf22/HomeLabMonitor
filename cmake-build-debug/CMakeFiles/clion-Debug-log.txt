@@ -1,0 +1,5 @@
+/snap/clion/222/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/222/bin/ninja/linux/x64/ninja -G Ninja -S "/home/logan/CLionProjects/C-GUI Test" -B "/home/logan/CLionProjects/C-GUI Test/cmake-build-debug"
+-- Found CURL: /usr/lib/x86_64-linux-gnu/libcurl.so (found version "7.81.0")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/logan/CLionProjects/C-GUI Test/cmake-build-debug
