@@ -18,7 +18,7 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
     char *ptr = realloc(mem->response, mem->size + realsize + 1);   //Reallocate the size of the response object
 
     if(ptr == NULL)                             //oh. shit
-        return 0;  /* out of memory! */         //Really.  that's not good.
+        return 0;                               //Really.  that's not good.
 
     mem->response = ptr;
     memcpy(&(mem->response[mem->size]), data, realsize);
@@ -82,31 +82,38 @@ static int update_BLOCKEDQ(GtkWidget *text){
 //initiate window
 static void activate (GtkApplication* app, gpointer user_data){
     //Window Settings
-    GtkWidget *window = gtk_application_window_new (app);                   //create a new window
-    gtk_window_set_title (GTK_WINDOW (window), "Datacenter Control");    //Set the name of the window
-    gtk_window_set_default_size (GTK_WINDOW (window), 400, 300); //Set the default window size
+    GtkWidget *window = gtk_application_window_new (app);                       //create a new window
+    gtk_window_set_title (GTK_WINDOW (window), "Datacenter Control");        //Set the name of the window
+    gtk_window_set_default_size (GTK_WINDOW (window), 400, 300);     //Set the default window size
 
-    //Default widget alignments
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,5);       //set the box orientation to vertical
-    gtk_widget_set_halign (box, GTK_ALIGN_CENTER);                       //Align the Horizontal Axis to center
-    gtk_widget_set_valign (box, GTK_ALIGN_CENTER);                       //Alight the Vertical Axis to center
-    gtk_window_set_child(GTK_WINDOW(window),box);                        //Set the bounding box as the child of the window
+    //Default Window Box
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,5);         //set the box orientation to vertical
+    gtk_widget_set_halign (box, GTK_ALIGN_START);                            //Align the Horizontal Axis to center
+    gtk_widget_set_valign (box, GTK_ALIGN_START);                            //Alight the Vertical Axis to center
+    gtk_window_set_child(GTK_WINDOW(window),box);                           //Set the bounding box as the child of the window
 
 
+    //create frame to hold all PiHole data
+    GtkWidget *PiHoleFrame = gtk_frame_new("PiHole Data");                          //Create the frame to hold the pihole metrics
+    gtk_box_append(GTK_BOX(box),PiHoleFrame);                                  //Add the PiHole data frame to the main box
+
+    //Create a pihole specific data box
+    GtkWidget *PiHoleBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,5);   //creates a new box to contain pihole metrics
+    gtk_frame_set_child(GTK_FRAME(PiHoleFrame),PiHoleBox);                    //Sets the box to the child frame
 
     //initialize DNS query frame
-    GtkWidget *DNSQFrame = gtk_frame_new("DNS Queries");        //Define the DNS Queries frame
-    gtk_box_append(GTK_BOX(box),DNSQFrame);                //Set the DNSQ frame as a child of the box
+    GtkWidget *DNSQFrame = gtk_frame_new("DNS Queries");                            //Define the DNS Queries frame
+    gtk_box_append(GTK_BOX(PiHoleBox),DNSQFrame);                               //Set the DNSQ frame as a child of the box
     //Initialize query counter
-    GtkWidget *DNSQ = gtk_label_new("INITIALIZING");             //text box to contain the total DNS queries
-    gtk_frame_set_child(GTK_FRAME(DNSQFrame),DNSQ);      //set text as child of frame
+    GtkWidget *DNSQ = gtk_label_new("INITIALIZING");                                  //text box to contain the total DNS queries
+    gtk_frame_set_child(GTK_FRAME(DNSQFrame),DNSQ);                           //set text as child of frame
 
     //initialize blocked query frame
-    GtkWidget *BlockedQFrame = gtk_frame_new("Blocked Queries");         //Create a frame to contain the PiHole data
-    gtk_box_append(GTK_BOX(box),BlockedQFrame);                     //Set the frame as a child of the box
+    GtkWidget *BlockedQFrame = gtk_frame_new("Blocked Queries");                    //Create a frame to contain the PiHole data
+    gtk_box_append(GTK_BOX(PiHoleBox),BlockedQFrame);                          //Set the frame as a child of the box
     //Initialize blocked query counter
-    GtkWidget *BLOCKEDQ = gtk_label_new("INITIALIZING");                  //Define the updatable blocked queries text
-    gtk_frame_set_child(GTK_FRAME(BlockedQFrame),BLOCKEDQ);       //Set the Blocked queries as the child of the frame
+    GtkWidget *BLOCKEDQ = gtk_label_new("INITIALIZING");                             //Define the updatable blocked queries text
+    gtk_frame_set_child(GTK_FRAME(BlockedQFrame),BLOCKEDQ);                  //Set the Blocked queries as the child of the frame
 
 
     //Add async functions
