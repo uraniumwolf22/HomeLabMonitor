@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 project(C_GUI_Test C)
 
 set(CMAKE_C_STANDARD 11)
-set(SOURCE_FILES main.c)
+set(SOURCE_FILES main.c main.h)
 
 
 find_package(PkgConfig REQUIRED)

@@ -4,29 +4,11 @@
 #include <curl/easy.h>
 #include <string.h>
 #include <json-c/json.h>
-
-
+#include "main.h"
 //stores the PiHole URL and auth key
-char* pihole_URL = "http://pihole.int/admin/api.php?summary&auth=5e3b902de71e0bd612499f76795d15d7905ea45c0545f55c9f897b60790508af";
-
-//struct to add further options later?
-struct request {        //store the initial request data.  Its redundant I know, but I have a feeling I will need more functionality.  if you disagree fuck you <3
-    char *url;
-};
-
-//memory structure
-struct memory {         //stores the full response of a JSON url
-    char *response;
-    size_t size;
-};
-
-struct pihole_response{     //structure to store the PiHole response
-    char* blocked_requests;
-    char* DNS_requests;
-};
+static char* pihole_URL = "http://pihole.int/admin/api.php?summary&auth=5e3b902de71e0bd612499f76795d15d7905ea45c0545f55c9f897b60790508af";
 
 struct pihole_response piholeResponse_; //set a global to store the most recent PiHole response
-
 //curl data callback function
 static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
 {
@@ -75,7 +57,7 @@ char*  GET_RESPONSE(struct request req_)
 }
 
 //update the global PiHole data structure with new data from API
-void update_responses(void){
+static void update_responses(void){
     struct request request_std;         //Create an instance of a standard request structure
     request_std.url = pihole_URL;       //Set the request structure to the PiHole URL
 
@@ -87,12 +69,12 @@ void update_responses(void){
 
 
 //Update the total queries widget
-int update_DNSQ(GtkWidget *text){
+static int update_DNSQ(GtkWidget *text){
     gtk_label_set_label(GTK_LABEL(text),piholeResponse_.DNS_requests);      //Set the label based on the global struct
     return TRUE;
 }
 //Update the blocked queries widget
-int update_BLOCKEDQ(GtkWidget *text){
+static int update_BLOCKEDQ(GtkWidget *text){
     gtk_label_set_label(GTK_LABEL(text),piholeResponse_.blocked_requests);  //Set the label based on the global struct
     return TRUE;
 }
@@ -105,22 +87,26 @@ static void activate (GtkApplication* app, gpointer user_data){
     gtk_window_set_default_size (GTK_WINDOW (window), 400, 300); //Set the default window size
 
     //Default widget alignments
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL,5);   //set the box orientation to vertical
-    gtk_widget_set_halign (box, GTK_ALIGN_CENTER);                   //Align the Horizontal Axis to center
-    gtk_widget_set_valign (box, GTK_ALIGN_CENTER);                   //Alight the Vertical Axis to center
-    gtk_window_set_child(GTK_WINDOW(window),box);                    //Set the bounding box as the child of the window
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,5);       //set the box orientation to vertical
+    gtk_widget_set_halign (box, GTK_ALIGN_CENTER);                       //Align the Horizontal Axis to center
+    gtk_widget_set_valign (box, GTK_ALIGN_CENTER);                       //Alight the Vertical Axis to center
+    gtk_window_set_child(GTK_WINDOW(window),box);                        //Set the bounding box as the child of the window
 
+
+
+    //initialize DNS query frame
+    GtkWidget *DNSQFrame = gtk_frame_new("DNS Queries");        //Define the DNS Queries frame
+    gtk_box_append(GTK_BOX(box),DNSQFrame);                //Set the DNSQ frame as a child of the box
     //Initialize query counter
-    GtkWidget *DNSQ = gtk_label_new("INITIALIZING");                    //Define updatable text
-    GtkWidget *DNS_label = gtk_label_new("DNS Queries Today");          //Define label for Total DNS Queries
-    gtk_box_append(GTK_BOX(box), DNSQ);                           //Append the labels to the bounding box
-    gtk_box_append(GTK_BOX(box),DNS_label);                       //
+    GtkWidget *DNSQ = gtk_label_new("INITIALIZING");             //text box to contain the total DNS queries
+    gtk_frame_set_child(GTK_FRAME(DNSQFrame),DNSQ);      //set text as child of frame
 
+    //initialize blocked query frame
+    GtkWidget *BlockedQFrame = gtk_frame_new("Blocked Queries");         //Create a frame to contain the PiHole data
+    gtk_box_append(GTK_BOX(box),BlockedQFrame);                     //Set the frame as a child of the box
     //Initialize blocked query counter
-    GtkWidget *BLOCKEDQ = gtk_label_new("INITIALIZING");                //Define updatable text
-    GtkWidget *BLOCKEDQ_label = gtk_label_new("Blocked Queries Today"); //Define label for Blocked queries
-    gtk_box_append(GTK_BOX(box),BLOCKEDQ);                        //Append the labels to the bounding box
-    gtk_box_append(GTK_BOX(box), BLOCKEDQ_label);                 //
+    GtkWidget *BLOCKEDQ = gtk_label_new("INITIALIZING");                  //Define the updatable blocked queries text
+    gtk_frame_set_child(GTK_FRAME(BlockedQFrame),BLOCKEDQ);       //Set the Blocked queries as the child of the frame
 
 
     //Add async functions
