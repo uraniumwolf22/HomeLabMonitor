@@ -19,6 +19,7 @@ struct memory {         //stores the full response of a JSON url
 struct pihole_response{     //structure to store the PiHole response
     char* blocked_requests;
     char* DNS_requests;
+    char* BlockedPercent;
 };
 
 
