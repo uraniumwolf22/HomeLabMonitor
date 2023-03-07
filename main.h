@@ -6,8 +6,14 @@
 
 
 //struct to add further options later?
-struct request {        //store the initial request data.  Its redundant I know, but I have a feeling I will need more functionality.  if you disagree fuck you <3
+struct request {
     char *url;
+    char *auth;
+    char *cookie;
+    char* PToken;
+    char* user;
+    char* pass;
+    char* realm;
 };
 
 //memory structure
@@ -17,9 +23,15 @@ struct memory {         //stores the full response of a JSON url
 };
 
 struct pihole_response{     //structure to store the PiHole response
-    char* blocked_requests;
-    char* DNS_requests;
+    char* BlockedRequests;
+    char* DnsRequests;
     char* BlockedPercent;
+    char* CachedQueries;
 };
 
+struct GlobalAuthDataTemplate{
+    char* CSRFToken;
+    char* cookie;
+    char* authorization;
+};
 
