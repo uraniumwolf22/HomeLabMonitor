@@ -9,6 +9,7 @@
 char * PVEAUTH = "Authorization: PVAPIToken:monitoring:996fb9af-1338-490f-b46a-cfded8f3151d";
 static char* pihole_URL = "http://pihole.int/admin/api.php?summary&auth=";
 static char* pihole_auth = "5e3b902de71e0bd612499f76795d15d7905ea45c0545f55c9f897b60790508af";
+
 static int UpdateFreqFast = 1;  //Fast update frequency in seconds
 static int UpdateFreqSlow = 5;  //Slow update frequency in seconds
 
@@ -109,26 +110,26 @@ char* UpdateAuthData(struct request req_){
 char*  GET_RESPONSE(struct request req_, char* api)
 {
     struct memory chunk = {0}; //define the structure containing memory chunks (url data)
-    char *url;
-    char *token = (char *) malloc(strlen(req_.PToken) + strlen("CSRFPreventionToken: ") + 1);
-    char *cookie = (char *) malloc(strlen(req_.cookie) + strlen("Cookie: PVEAuthCookie= ") + 1);
+    char *url = NULL;
+    char *token = NULL;
+    char *cookie = NULL;
 
     if(api == "pi") {
-        printf("API mode set to PiHole \n");
         url = (char *) malloc(strlen(req_.auth) + strlen(req_.url) + 1);
 
-        //copy url and auth into full url
-        strcpy(url, req_.url);
+
+        strcpy(url, req_.url);      //build URL in PiHole Form
         strcat(url, req_.auth);
     }
-    if(api == "prox"){
-        printf("API mode set to Proxmox \n");
-        url = req_.url;
+    if(api == "prox"){                                          //check if API in proxmox mode
+        url = req_.url;                                         //pass url from request struct
 
-        strcpy(token, "CSRFPreventionToken: ");
+        token = (char *) malloc(strlen(req_.PToken) + strlen("CSRFPreventionToken: ") + 1);     //set token to right size
+        strcpy(token, "CSRFPreventionToken: ");                                                  //build token
         strcat(token, req_.PToken);
 
-        strcpy(cookie, "Cookie: PVEAuthCookie=");
+        cookie = (char *) malloc(strlen(req_.cookie) + strlen("Cookie: PVEAuthCookie= ") + 1);  //set cookie to right size
+        strcpy(cookie, "Cookie: PVEAuthCookie=");                                                //build cookie
         strcat(cookie, req_.cookie);
     }
 
@@ -137,26 +138,23 @@ char*  GET_RESPONSE(struct request req_, char* api)
     CURLcode res;
 
     //free any previous response chunks
-    free(chunk.response);
+    free(chunk.response);                                  //free the response memory
 
-    curl = curl_easy_init();
+    curl = curl_easy_init();                                    //init curl
     if(curl) { //if curl initialized
-        struct curl_slist *headers = NULL;
+        struct curl_slist *headers = NULL;                      //init header vars
 
-        if(api == "prox") {
-            printf(token);
-            printf("\n");
-            printf(cookie);
-            headers = curl_slist_append(headers, token);
-            headers = curl_slist_append(headers, cookie);
-            headers = curl_slist_append(headers, req_.auth);
+        if(api == "prox") {                                     //check if in proxmox API mode
+            headers = curl_slist_append(headers, token);        //set headers if in correct mode
+            headers = curl_slist_append(headers, cookie);       //
+            headers = curl_slist_append(headers, req_.auth);    //
             printf("Added Headers \n");
         }
 
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_easy_setopt(curl, CURLOPT_URL, url);          //set the data url
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);    //append headers to call
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);     //set to follow 1 redirect
+        curl_easy_setopt(curl, CURLOPT_URL, url);                   //set the data url
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);        //append headers to call
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);         //set to follow 1 redirect
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);          //what function to call on chunk being recieved
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);  //call function to write data
@@ -172,10 +170,10 @@ char*  GET_RESPONSE(struct request req_, char* api)
 
         curl_easy_cleanup(curl); //cleanup curl WHY MEMORY WHYYYYY
     }
-    if (token != NULL) {
+    if (token != NULL) {        //free token if not empty
         free(token);
     }
-    if (cookie != NULL) {
+    if (cookie != NULL) {       //free cookie if not empty
         free(cookie);
     }
 
